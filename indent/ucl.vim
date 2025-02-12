@@ -2,7 +2,7 @@
 " Language:     UCL (Universal Configuration Language)
 " Maintainer:   Oscar Wallberg <oscar.wallberg@outlook.com>
 " Upstream:     https://github.com/owallb/vim-ucl
-" Last Change:  2025-02-11
+" Last Change:  2025-02-12
 
 " Only load this indent file when no other was loaded
 if exists("b:did_indent")
@@ -74,7 +74,7 @@ function! GetUCLIndent(lnum)
         endif
     endif
 
-    if line =~ '^\s*[}]\s*$' || line =~ '^\s*]\s*$'
+    if line =~ '^\s*\}[,;]\?\s*$' || line =~ '^\s*\][,;]\?\s*$'
         return indent(prevlnum) - shiftwidth()
     endif
 
@@ -86,7 +86,7 @@ function! GetUCLIndent(lnum)
         return ind + shiftwidth()
     endif
 
-    if prevline =~ '[{[,]\s*$'
+    if prevline =~ '[{[]\s*$'
         return ind + shiftwidth()
     endif
 
