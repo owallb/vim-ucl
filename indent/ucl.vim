@@ -24,6 +24,8 @@ let s:cblock_start_pat = '^\s*/\*'
 let s:cblock_end_pat = '^\s*\*/'
 let s:hdoc_start_pat = '<<\u\+\s*$'
 let s:hdoc_end_pat = '^\u\+\s*$'
+let s:container_end_pat = '^\s*[}\]][,;]\?\s*$'
+let s:container_start_pat = '[{[]\s*$'
 
 function! s:IsInCommentBlock(lnum)
     let l:start = searchpair(s:cblock_start_pat, '', s:cblock_end_pat, 'bnW')
@@ -74,19 +76,11 @@ function! GetUCLIndent(lnum)
         endif
     endif
 
-    if line =~ '^\s*\}[,;]\?\s*$' || line =~ '^\s*\][,;]\?\s*$'
-        return indent(prevlnum) - shiftwidth()
+    if line =~ s:container_end_pat
+        return ind - shiftwidth()
     endif
 
-    if prevline =~ '\[\s*$'
-        return ind + shiftwidth()
-    endif
-
-    if prevline =~ '{\s*$'
-        return ind + shiftwidth()
-    endif
-
-    if prevline =~ '[{[]\s*$'
+    if prevline =~ s:container_start_pat
         return ind + shiftwidth()
     endif
 
