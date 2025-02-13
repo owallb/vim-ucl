@@ -2,7 +2,7 @@
 " Language:     UCL (Universal Configuration Language)
 " Maintainer:   Oscar Wallberg <oscar.wallberg@outlook.com>
 " Upstream:     https://github.com/owallb/vim-ucl
-" Last Change:  2025-02-12
+" Last Change:  2025-02-13
 
 " Only load this indent file when no other was loaded
 if exists("b:did_indent")
@@ -28,15 +28,13 @@ let s:container_end_pat = '^\s*[}\]][,;]\?\s*$'
 let s:container_start_pat = '[{[]\s*$'
 
 function! s:IsInCommentBlock(lnum)
-    let l:start = searchpair(s:cblock_start_pat, '', s:cblock_end_pat, 'bnW')
-    let l:end = searchpair(s:cblock_start_pat, '', s:cblock_end_pat, 'nW')
-    return start > 0 && (end == 0 || a:lnum <= end)
+    let l:syn = synIDattr(synID(a:lnum, col('.'), 0), 'name')
+    return syn == 'uclMultilineComment'
 endfunction
 
 function! s:IsInHereDoc(lnum)
-    let l:start = searchpair(s:hdoc_start_pat, '', s:hdoc_end_pat, 'bnW')
-    let l:end = searchpair(s:hdoc_start_pat, '', s:hdoc_end_pat, 'nW')
-    return start > 0 && (end == 0 || a:lnum <= end)
+    let l:syn = synIDattr(synID(a:lnum, col('.'), 0), 'name')
+    return syn == 'uclHereDocString'
 endfunction
 
 function! GetUCLIndent(lnum)
