@@ -24,8 +24,9 @@ let s:cblock_start_pat = '^\s*/\*'
 let s:cblock_end_pat = '^\s*\*/'
 let s:hdoc_start_pat = '<<\u\+\s*$'
 let s:hdoc_end_pat = '^\u\+\s*$'
-let s:container_end_pat = '^\s*[}\]][,;]\?\s*$'
 let s:container_start_pat = '[{[]\s*$'
+let s:brace_end_pat = '\}[,;]\?\s*$'
+let s:bracket_end_pat = '\][,;]\?\s*$'
 
 function! s:IsInCommentBlock(lnum)
     let l:syn = synIDattr(synID(a:lnum, col('.'), 0), 'name')
@@ -35,6 +36,11 @@ endfunction
 function! s:IsInHereDoc(lnum)
     let l:syn = synIDattr(synID(a:lnum, col('.'), 0), 'name')
     return syn == 'uclHereDocString'
+endfunction
+
+function! s:IsInCommentOrString()
+    let l:syn = synIDattr(synID(line('.'), col('.'), 0), 'name')
+    return l:syn =~? 'comment\|string'
 endfunction
 
 function! GetUCLIndent(lnum)
@@ -57,8 +63,6 @@ function! GetUCLIndent(lnum)
         endif
     endif
 
-    let l:ind = indent(prevlnum)
-
     if s:IsInHereDoc(a:lnum)
         return -1
     endif
@@ -74,8 +78,26 @@ function! GetUCLIndent(lnum)
         endif
     endif
 
-    if line =~ s:container_end_pat
-        return ind - shiftwidth()
+    let l:ind = indent(prevlnum)
+
+    if line =~ s:brace_end_pat
+        let l:start = searchpair(
+                    \ '{', '', '}\zs', 'bnW', 's:IsInCommentOrString()')
+        if start > 0
+            return indent(start)
+        else
+            return -1
+        endif
+    endif
+
+    if line =~ s:bracket_end_pat
+        let l:start = searchpair(
+                    \ '\[', '', '\]\zs', 'bnW', 's:IsInCommentOrString()')
+        if start > 0
+            return indent(start)
+        else
+            return -1
+        endif
     endif
 
     if prevline =~ s:container_start_pat
