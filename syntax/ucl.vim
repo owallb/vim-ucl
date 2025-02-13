@@ -2,7 +2,7 @@
 " Language:     UCL (Universal Configuration Language)
 " Maintainer:   Oscar Wallberg <oscar.wallberg@outlook.com>
 " Upstream:     https://github.com/owallb/vim-ucl
-" Last Change:  2025-02-11
+" Last Change:  2025-02-13
 
 if exists("b:current_syntax")
   finish
@@ -50,7 +50,6 @@ hi def link uclFloat Float
 hi def link uclHex Number
 hi def link uclString String
 hi def link uclHereDocString uclString
-hi def link uclUnquotedString uclString
 hi def link uclEscape Special
 hi def link uclComment Comment
 hi def link uclMultilineComment Comment
