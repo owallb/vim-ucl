@@ -53,7 +53,7 @@ syn region uclCommentBlock
             \ contains=uclCommentBlock,@Spell
 
 " Structure and list syntax
-syn match uclKey "^\s*[a-zA-Z0-9_-]\+\>" nextgroup=uclKeyOperator,@uclValues skipwhite
+syn match uclKeys "^\%(\s*[a-zA-Z0-9_-]\+\)\+" nextgroup=uclKeyOperator,@uclValues skipwhite
 syn match uclKeyOperator "[=:]" contained nextgroup=@uclValues skipwhite
 
 " Preprocessor
@@ -79,7 +79,7 @@ hi def link uclCommentBlock Comment
 hi def link uclVariable Identifier
 hi def link uclMacro PreProc
 hi def link uclInclude Include
-hi def link uclKey Identifier
+hi def link uclKeys Identifier
 hi def link uclKeyOperator Operator
 hi def link uclRef Identifier
 hi def link uclBraceError Error
