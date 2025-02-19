@@ -48,8 +48,8 @@ function! s:IsInHereDoc()
 endfunction
 
 function! s:IsInCommentBlock()
-    let match = searchpair(s:cblock_start_pat, '', s:cblock_end_pat, 'bnW',
-                \ 's:IsString()')
+    let match = searchpair(s:cblock_start_pat, '', s:cblock_end_pat . '\zs',
+                \ 'bnW', 's:IsString()')
     return match > 0
 endfunction
 
