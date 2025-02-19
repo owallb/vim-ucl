@@ -2,7 +2,7 @@
 " Language:     UCL (Universal Configuration Language)
 " Maintainer:   Oscar Wallberg <oscar.wallberg@outlook.com>
 " Upstream:     https://github.com/owallb/vim-ucl
-" Last Change:  2025-02-13
+" Last Change:  2025-02-19
 
 " Only load this indent file when no other was loaded
 if exists("b:did_indent")
@@ -10,7 +10,7 @@ if exists("b:did_indent")
 endif
 let b:did_indent = 1
 
-setlocal indentexpr=GetUCLIndent(v:lnum)
+setlocal indentexpr=GetUCLIndent()
 setlocal indentkeys=0{,0},0],!^F,o,O
 
 let b:undo_indent = "setl inde< indk<"
@@ -22,83 +22,101 @@ endif
 
 let s:cblock_start_pat = '^\s*/\*'
 let s:cblock_end_pat = '^\s*\*/'
-let s:hdoc_start_pat = '<<\u\+\s*$'
-let s:hdoc_end_pat = '^\u\+\s*$'
 let s:container_start_pat = '[{[]\s*$'
-let s:brace_end_pat = '\}[,;]\?\s*$'
-let s:bracket_end_pat = '\][,;]\?\s*$'
+let s:brace_end_pat = '^\s*\}[,;]\?\s*$'
+let s:bracket_end_pat = '^\s*\][,;]\?\s*$'
 
-function! s:IsInCommentBlock(lnum)
-    let l:syn = synIDattr(synID(a:lnum, col('.'), 0), 'name')
-    return syn == 'uclMultilineComment'
+function! s:GetCurSyn()
+    return synIDattr(synID(line('.'), col('.'), 0), 'name')
 endfunction
 
-function! s:IsInHereDoc(lnum)
-    let l:syn = synIDattr(synID(a:lnum, col('.'), 0), 'name')
-    return syn == 'uclHereDocString'
+function! s:IsComment()
+    return s:GetCurSyn() =~? 'comment'
 endfunction
 
-function! s:IsInCommentOrString()
-    let l:syn = synIDattr(synID(line('.'), col('.'), 0), 'name')
-    return l:syn =~? 'comment\|string'
+function! s:IsString()
+    return s:GetCurSyn() =~? 'string'
 endfunction
 
-function! GetUCLIndent(lnum)
-    let l:prevlnum = prevnonblank(a:lnum - 1)
-    if prevlnum == 0
-        return 0
+function! s:IsCommentOrString()
+    return s:IsComment() || s:IsString()
+endfunction
+
+function! s:IsInHereDoc()
+    return synIDattr(synID(
+                \ prevnonblank(v:lnum), 1, 0), 'name') =~ 'uclHereDoc'
+endfunction
+
+function! s:IsInCommentBlock()
+    let match = searchpair(s:cblock_start_pat, '', s:cblock_end_pat, 'bnW',
+                \ 's:IsString()')
+    return match > 0
+endfunction
+
+function! s:CommentIndent()
+    let cblock_start_lnum = s:PrevCodeLine()
+    let ind = indent(cblock_start_lnum)
+
+    if getline(v:lnum) =~ '^\s*\*'
+        return ind + 1
     endif
 
-    let l:line = getline(a:lnum)
-    let l:prevline = getline(prevlnum)
+    return ind
+endfunction
 
-    if s:IsInCommentBlock(a:lnum)
-        return cindent(a:lnum)
-    endif
+function! s:PrevCodeLine()
+    let lnum = prevnonblank(v:lnum - 1)
 
-    if prevline =~ s:cblock_end_pat
-        let l:commentstart = search(s:cblock_start_pat, 'bnW')
-        if commentstart > 0
-            return indent(commentstart)
+    while lnum > 0
+        if synIDattr(synID(lnum, 1, 0), 'name') =~ 'uclHereDoc\|uclCommentBlock'
+            let lnum -= 1
+        else
+            break
         endif
-    endif
 
-    if s:IsInHereDoc(a:lnum)
+        let lnum = prevnonblank(lnum)
+    endwhile
+
+    return lnum
+endfunction
+
+function! GetUCLIndent()
+    if s:IsInHereDoc()
         return -1
     endif
 
-    if line =~ s:hdoc_end_pat
-        return 0
+    if s:IsInCommentBlock()
+        return s:CommentIndent()
     endif
 
-    if prevline =~ s:hdoc_end_pat
-        let l:hdocstart = search(s:hdoc_start_pat, 'bnW')
-        if hdocstart > 0
-            return indent(hdocstart)
-        endif
-    endif
-
-    let l:ind = indent(prevlnum)
+    let line = getline(v:lnum)
 
     if line =~ s:brace_end_pat
-        let l:start = searchpair(
-                    \ '{', '', '}\zs', 'bnW', 's:IsInCommentOrString()')
-        if start > 0
-            return indent(start)
+        let match = searchpair('{', '', '}\zs', 'bnW', 's:IsCommentOrString()')
+        if match > 0
+            return indent(match)
         else
             return -1
         endif
     endif
 
     if line =~ s:bracket_end_pat
-        let l:start = searchpair(
-                    \ '\[', '', '\]\zs', 'bnW', 's:IsInCommentOrString()')
-        if start > 0
-            return indent(start)
+        let match = searchpair(
+                    \ '\[', '', '\]\zs', 'bnW', 's:IsCommentOrString()')
+        if match > 0
+            return indent(match)
         else
             return -1
         endif
     endif
+
+    let prevlnum = s:PrevCodeLine()
+    if prevlnum == 0
+        return 0
+    endif
+
+    let ind = indent(prevlnum)
+    let prevline = getline(prevlnum)
 
     if prevline =~ s:container_start_pat
         return ind + shiftwidth()

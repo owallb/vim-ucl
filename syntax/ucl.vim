@@ -2,45 +2,65 @@
 " Language:     UCL (Universal Configuration Language)
 " Maintainer:   Oscar Wallberg <oscar.wallberg@outlook.com>
 " Upstream:     https://github.com/owallb/vim-ucl
-" Last Change:  2025-02-13
+" Last Change:  2025-02-19
 
 if exists("b:current_syntax")
   finish
 endif
 
 " Scalars
-syn match uclEscape contained "\\."
 syn keyword uclBoolean true false yes no contained
 syn keyword uclNull null contained
 syn match uclNumber "\<\d\+\>" contained
 syn match uclFloat "\<\d\+\.\d\+\>" contained
 syn match uclHex "\<0x[0-9a-fA-F]\+\>" contained
+
+" Strings
+syn match uclEscape contained "\\."
 syn region uclString start=/"/ skip=/\\\\\|\\"/ end=/"/ contained contains=uclEscape
 syn region uclString start=/'/ skip=/\\\\\|\\'/ end=/'/ contained contains=uclEscape
-syn region uclHereDocString start=/<<\z([a-z0-9A-Z]\+\)/ end=/^\z1/ fold contained contains=uclEscape
+syn region uclHereDocString 
+            \ matchgroup=uclHereDocDelimiterStart
+            \ start="<<\z(\u\+\)"
+            \ matchgroup=uclHereDocDelimiterEnd
+            \ end="^\z1"
+            \ fold contained
+            \ contains=uclEscape
 
 " Nested structures
 syn region uclBlock start="{" end="}" fold transparent contained
 syn region uclList start="\[" end="\]" fold transparent contained
 
 " Grouping
-syn cluster uclValues contains=uclBoolean,uclNull,uclNumber,uclFloat,uclHex,uclString,uclHereDocString,uclBlock,uclList
+syn cluster uclValues
+            \ contains=
+            \ uclBoolean,
+            \ uclNull,
+            \ uclNumber,
+            \ uclFloat,
+            \ uclHex,
+            \ uclString,
+            \ uclHereDocString,
+            \ uclBlock,
+            \ uclList
 
 " Comments
 syn match uclComment "#.*$" contains=@Spell
-syn region uclMultilineComment start="/\*" end="\*/" fold contains=uclMultilineComment,@Spell
+syn region uclCommentBlock
+            \ start="/\*"
+            \ end="\*/"
+            \ fold
+            \ contains=uclCommentBlock,@Spell
 
 " Structure and list syntax
 syn match uclKey "^\s*[a-zA-Z0-9_-]\+\>" nextgroup=uclKeyOperator,@uclValues skipwhite
 syn match uclKeyOperator "[=:]" contained nextgroup=@uclValues skipwhite
 
-" UCL specific
+" Preprocessor
 syn match uclVariable "\${[^}]*}"
+syn match uclRef "\$[a-zA-Z0-9_.-]\+"
 syn match uclMacro "@[a-zA-Z0-9_-]\+"
 syn match uclInclude "^@include\>"
-
-" Variable references
-syn match uclRef "\$[a-zA-Z0-9_.-]\+"
 
 " Define highlighting
 hi def link uclBoolean Boolean
@@ -50,9 +70,12 @@ hi def link uclFloat Float
 hi def link uclHex Number
 hi def link uclString String
 hi def link uclHereDocString uclString
+hi def link uclHereDocDelimiter Delimiter
+hi def link uclHereDocDelimiterStart uclHereDocDelimiter
+hi def link uclHereDocDelimiterEnd uclHereDocDelimiter
 hi def link uclEscape Special
 hi def link uclComment Comment
-hi def link uclMultilineComment Comment
+hi def link uclCommentBlock Comment
 hi def link uclVariable Identifier
 hi def link uclMacro PreProc
 hi def link uclInclude Include
