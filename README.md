@@ -15,9 +15,6 @@ Plug 'owallb/vim-ucl'
 ```lua
 {
   'owallb/vim-ucl',
-  ft = 'ucl',
-  -- Optional: if you want it for other file types
-  -- ft = { 'ucl', 'conf' },
 }
 ```
 
