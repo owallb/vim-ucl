@@ -44,7 +44,11 @@ endfunction
 
 function! s:IsInHereDoc()
     return synIDattr(synID(
-                \ prevnonblank(v:lnum), 1, 0), 'name') =~ 'uclHereDoc'
+                \ prevnonblank(v:lnum), 1, 0), 'name') =~ 'uclHereDocString'
+endfunction
+
+function! s:IsHereDocEnd()
+    return synIDattr(synID(v:lnum, 1, 0), 'name') =~ 'uclHereDocDelimiterEnd'
 endfunction
 
 function! s:IsInCommentBlock()
@@ -81,7 +85,7 @@ function! s:PrevCodeLine()
 endfunction
 
 function! GetUCLIndent()
-    if s:IsInHereDoc()
+    if s:IsInHereDoc() || s:IsHereDocEnd()
         return -1
     endif
 
