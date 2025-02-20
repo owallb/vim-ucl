@@ -11,7 +11,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetUCLIndent()
-setlocal indentkeys=0{,0},0],!^F,o,O
+setlocal indentkeys=0{,0},0],0),!^F,o,O
 
 let b:undo_indent = "setl inde< indk<"
 
@@ -22,9 +22,10 @@ endif
 
 let s:cblock_start_pat = '^\s*/\*'
 let s:cblock_end_pat = '^\s*\*/'
-let s:container_start_pat = '[{[]\s*$'
+let s:container_start_pat = '[{[(]\s*$'
 let s:brace_end_pat = '^\s*\}'
 let s:bracket_end_pat = '^\s*\]'
+let s:paren_end_pat = '^\s*)'
 
 function! s:GetCurSyn()
     return synIDattr(synID(line('.'), col('.'), 0), 'name')
@@ -107,6 +108,15 @@ function! GetUCLIndent()
     if line =~ s:bracket_end_pat
         let match = searchpair(
                     \ '\[', '', '\]\zs', 'bnW', 's:IsCommentOrString()')
+        if match > 0
+            return indent(match)
+        else
+            return -1
+        endif
+    endif
+
+    if line =~ s:paren_end_pat
+        let match = searchpair('(', '', ')\zs', 'bnW', 's:IsCommentOrString()')
         if match > 0
             return indent(match)
         else

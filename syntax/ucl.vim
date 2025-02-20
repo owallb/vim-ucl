@@ -23,8 +23,8 @@ syn match uclHex "-\?\<0x[0-9a-fA-F]\+\%(min\|ms\|[shdwy]\)\>" contained
 
 " Strings
 syn match uclEscape contained "\\."
-syn region uclString start=/"/ skip=/\\\\\|\\"/ end=/"/ contained contains=uclEscape
-syn region uclString start=/'/ skip=/\\\\\|\\'/ end=/'/ contained contains=uclEscape
+syn match uclString /".*"/ contained contains=uclEscape
+syn match uclString /'.*'/ contained contains=uclEscape
 syn region uclHereDocString 
             \ matchgroup=uclHereDocDelimiterStart
             \ start="<<\z(\u\+\)"
@@ -59,14 +59,19 @@ syn region uclCommentBlock
             \ contains=uclCommentBlock,@Spell
 
 " Structure and list syntax
-syn match uclKeys "^\%(\s*[a-zA-Z0-9_-]\+\)\+" nextgroup=uclKeyOperator,@uclValues skipwhite
-syn match uclKeyOperator "[=:]" contained nextgroup=@uclValues skipwhite
+syn match uclKeys "^\%(\s*[a-zA-Z0-9_-]\+\)\+" skipwhite
+            \ nextgroup=uclKeyOperator,@uclValues
+syn match uclKeyOperator "[=:]" contained skipwhite nextgroup=@uclValues
 
 " Preprocessor
 syn match uclVariable "\${[^}]*}"
 syn match uclRef "\$[a-zA-Z0-9_.-]\+"
-syn match uclMacro "@[a-zA-Z0-9_-]\+"
-syn match uclInclude "^@include\>"
+syn match uclMacro "^\s*\.[a-zA-Z0-9_-]\+" skipwhite nextgroup=uclMacroOpt
+syn region uclMacroOpt start="(" end=")" fold transparent skipwhite contained 
+            \ contains=uclMacroOptKeys
+            \ nextgroup=uclString
+syn match uclMacroOptKeys "\%(\s*[a-zA-Z0-9_-]\+\)\+" skipwhite contained
+            \ nextgroup=uclKeyOperator,@uclValues
 
 " Define highlighting
 hi def link uclBoolean Boolean
@@ -82,12 +87,12 @@ hi def link uclHereDocDelimiterEnd uclHereDocDelimiter
 hi def link uclEscape Special
 hi def link uclComment Comment
 hi def link uclCommentBlock Comment
-hi def link uclVariable Identifier
-hi def link uclMacro PreProc
-hi def link uclInclude Include
 hi def link uclKeys Identifier
 hi def link uclKeyOperator Operator
+hi def link uclVariable Identifier
 hi def link uclRef Identifier
+hi def link uclMacro PreProc
+hi def link uclMacroOptKeys uclKeys
 
 " Enable folding
 if !exists("g:ucl_fold")
