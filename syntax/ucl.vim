@@ -88,8 +88,6 @@ hi def link uclInclude Include
 hi def link uclKeys Identifier
 hi def link uclKeyOperator Operator
 hi def link uclRef Identifier
-hi def link uclBraceError Error
-hi def link uclBracketError Error
 
 " Enable folding
 if !exists("g:ucl_fold")
