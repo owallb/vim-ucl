@@ -13,13 +13,13 @@ syn keyword uclBoolean true false yes no contained
 syn keyword uclNull null contained
 syn match uclNumber "-\?\<\d\+\>" contained
 syn match uclNumber "-\?\<\d\+[kKmMgG]b\?\>" contained
-syn match uclNumber "-\?\<\d\+\%(min\|ms\|[sdwy]\)\>" contained
+syn match uclNumber "-\?\<\d\+\%(min\|ms\|[shdwy]\)\>" contained
 syn match uclFloat "-\?\<\d\+\.\d\+\>" contained
 syn match uclFloat "-\?\<\d\+\.\d\+[kKmMgG]b\?\>" contained
-syn match uclFloat "-\?\<\d\+\.\d\+\%(min\|ms\|[sdwy]\)\>" contained
+syn match uclFloat "-\?\<\d\+\.\d\+\%(min\|ms\|[shdwy]\)\>" contained
 syn match uclHex "-\?\<0x[0-9a-fA-F]\+\>" contained
 syn match uclHex "-\?\<0x[0-9a-fA-F]\+[kKmMgG]b\?\>" contained
-syn match uclHex "-\?\<0x[0-9a-fA-F]\+\%(min\|ms\|[sdwy]\)\>" contained
+syn match uclHex "-\?\<0x[0-9a-fA-F]\+\%(min\|ms\|[shdwy]\)\>" contained
 
 " Strings
 syn match uclEscape contained "\\."
