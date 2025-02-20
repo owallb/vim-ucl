@@ -23,8 +23,8 @@ endif
 let s:cblock_start_pat = '^\s*/\*'
 let s:cblock_end_pat = '^\s*\*/'
 let s:container_start_pat = '[{[]\s*$'
-let s:brace_end_pat = '^\s*\}[,;]\?\s*$'
-let s:bracket_end_pat = '^\s*\][,;]\?\s*$'
+let s:brace_end_pat = '^\s*\}'
+let s:bracket_end_pat = '^\s*\]'
 
 function! s:GetCurSyn()
     return synIDattr(synID(line('.'), col('.'), 0), 'name')
